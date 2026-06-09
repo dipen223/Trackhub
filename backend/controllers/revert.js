@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path";
-import promisify from "util";
+import {promisify} from "util";
 
 const readDir = promisify(fs.readdir);
 const copyFile = promisify(fs.copyFile);
