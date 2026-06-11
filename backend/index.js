@@ -5,6 +5,7 @@
     import bodyParser from "body-parser";
     import http from "http";
     import {Server} from "socket.io"
+    import router from "./routes/main.router.js";
 
     import yargs from "yargs";
     import {hideBin} from "yargs/helpers";
@@ -67,10 +68,9 @@
             console.log("Connected to MongoDB");
         }).catch((err) => console.err("Unable to connect",err));
         app.use(cors({origin:"*"}));
+        app.use("/",router);
 
-        app.get("/",(req,res) => {
-            res.send("Welcome!");
-        });
+        
 
         let user = "test";
 
