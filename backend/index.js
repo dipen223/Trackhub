@@ -67,6 +67,7 @@
         mongoose.connect(mongoURI).then(() =>{
             console.log("Connected to MongoDB");
         }).catch((err) => console.err("Unable to connect",err));
+        
         app.use(cors({origin:"*"}));
         app.use("/",router);
 
