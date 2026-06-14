@@ -1,5 +1,4 @@
-import mongoose from "mongoose"
-import Schema from "mongoose/Schema";
+import mongoose, { Schema } from "mongoose";
 
 
 const RepoSchema = new Schema({

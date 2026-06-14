@@ -1,5 +1,5 @@
-import issueController from "../controllers/issueController";
-import express from express;
+import issueController from "../controllers/issueController.js";
+import express from "express";
 
 const issueRouter = express.Router();
 

@@ -1,10 +1,61 @@
+import User from "../models/userModel.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import {MongoClient }from "mongodb";
+import dotenv from "dotenv";
+
+
+dotenv.config();
+
+const uri = process.env.MONGO_URL;
+
+let client;
+
+async function connectClient(){
+    if(!client){
+        client = new MongoClient(uri);
+        await client.connect();
+    }
+}
+
 const getAllUsers = (req,res) =>{
     res.send("All users fetched!");
 
 };
 
-const signup  = (req,res) =>{
-    res.send("User created successfully");
+const signup  = async (req,res) =>{
+    const {username,email,password} = req.body;
+    if(!username || !email || !password){
+        return res.status(400).send("All fields are required");
+    }
+    try{
+        await connectClient();
+        const db = client.db("githubDB");
+        const usersCollection = db.collection("users");
+
+        const existingUser = await usersCollection.findOne({email});
+        if(existingUser){
+            return res.status(400).json({message:"User already exists"});
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password,salt);
+        const newUser = {
+            username,
+            email,
+            password:hashedPassword,
+            repositories:[],
+            followedUsers:[],
+            starRepository:[]
+        }
+        const result = await usersCollection.insertOne(newUser);
+        const token = jwt.sign({id:result.insertedId},process.env.JWT_SECRET_KEY,{expiresIn:"1h"});
+        res.json({token});
+
+    }catch(err){
+        console.error("Error during signup:",err.message);
+        res.status(500).json({message:"Internal server error"});
+    }
 };
 
 const login  = (req,res) =>{
