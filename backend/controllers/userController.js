@@ -1,8 +1,9 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import {MongoClient }from "mongodb";
+import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 
 
 dotenv.config();
@@ -11,97 +12,132 @@ const uri = process.env.MONGO_URL;
 
 let client;
 
-async function connectClient(){
-    if(!client){
+async function connectClient() {
+    if (!client) {
         client = new MongoClient(uri);
         await client.connect();
     }
 }
 
-const getAllUsers = (req,res) =>{
-    res.send("All users fetched!");
-
-};
-
-const signup  = async (req,res) =>{
-    const {username,email,password} = req.body;
-    if(!username || !email || !password){
-        return res.status(400).send("All fields are required");
-    }
-    try{
+const getAllUsers = async (req, res) => {
+    try {
         await connectClient();
         const db = client.db("githubDB");
         const usersCollection = db.collection("users");
 
-        const existingUser = await usersCollection.findOne({email});
-        if(existingUser){
-            return res.status(400).json({message:"User already exists"});
+        const users = await usersCollection.find({}).toArray();
+        res.json(users);
+
+    } catch (err) {
+        console.error("Error during fetching: ", err.message);
+        res.status(500).send("Server error!");
+    }
+};
+
+const signup = async (req, res) => {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+        return res.status(400).send("All fields are required");
+    }
+    try {
+        await connectClient();
+        const db = client.db("githubDB");
+        const usersCollection = db.collection("users");
+
+        const existingUser = await usersCollection.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
         }
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password,salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = {
             username,
             email,
-            password:hashedPassword,
-            repositories:[],
-            followedUsers:[],
-            starRepository:[]
+            password: hashedPassword,
+            repositories: [],
+            followedUsers: [],
+            starRepository: []
         }
         const result = await usersCollection.insertOne(newUser);
-        const token = jwt.sign({id:result.insertedId},process.env.JWT_SECRET_KEY,{expiresIn:"1h"});
-        res.json({token});
+        const token = jwt.sign({ id: result.insertedId }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
+        res.json({ token });
 
-    }catch(err){
-        console.error("Error during signup:",err.message);
-        res.status(500).json({message:"Internal server error"});
+    } catch (err) {
+        console.error("Error during signup:", err.message);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-const login  = async (req,res) =>{
-    const {email,password} = req.body;
-
-    try{
+const login = async (req, res) => {
+    const { email, password } = req.body;
+    try {
         await connectClient();
         const db = client.db("githubDB");
         const usersCollection = db.collection("users");
 
 
-        const existingUser = await usersCollection.findOne({email});
-        if(!existingUser){
-            return res.status(400).json({message:"Invalid Credentials!"});
+        const existingUser = await usersCollection.findOne({ email });
+        if (!existingUser) {
+            return res.status(400).json({ message: "Invalid Credentials!" });
         }
 
-        const isMatch = await bcrypt.compare(password,existingUser.password);
-        if(!isMatch){
-             return res.status(400).json({message:"Invalid Credentials!"});
+        const isMatch = await bcrypt.compare(password, existingUser.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid Credentials!" });
         }
 
-        const token = jwt.sign({id:existingUser._id},process.env.JWT_SECRET_KEY,{expiresIn:"1h"});
-        res.json({token,userId:existingUser._id});
-    }catch(err){
+        const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
+        res.json({ token, userId: existingUser._id });
+    } catch (err) {
 
-        console.error("Error during login:",err.message);
+        console.error("Error during login:", err.message);
         res.status(500).send("Server error!");
     }
 
- 
-    
-   
+
+
+
 };
 
 
-const getUserProfile = (req,res) => {
-    res.send("User profile fetched!");
+const getUserProfile = async (req, res) => {
+    const currentId = req.params.id;
+    console.log(currentId);
+
+    try {
+        await connectClient();
+        const db = client.db("githubDB");
+        const usersCollection = db.collection("users");
+
+        const user = await usersCollection.findOne({
+            _id: new ObjectId(currentId)
+        })
+
+        console.log("User found:", user);
+
+        if (!user) {
+            return res.status(404).send("User not found!");
+        }
+        return res.json({
+            message: "profile fetched",
+            user
+        });
+
+    } catch (err) {
+        console.error("Error during fetching: ", err.message);
+        res.status(500).send("Server error!");
+    }
+}
+
+
+const updateUserProfile = (req, res) => {
 
 }
-const updateUserProfile = (req,res) => {
 
-}
-
-const deleteUserProfile = (req,res) =>{
+const deleteUserProfile = (req, res) => {
     res.send("User profile deleted!");
 
 }
 
-export default {getAllUsers,signup,login,getUserProfile,updateUserProfile,deleteUserProfile};
+export default { getAllUsers, signup, login, getUserProfile, updateUserProfile, deleteUserProfile };
