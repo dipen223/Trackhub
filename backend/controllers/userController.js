@@ -94,16 +94,11 @@ const login = async (req, res) => {
         console.error("Error during login:", err.message);
         res.status(500).send("Server error!");
     }
-
-
-
-
 };
 
 
 const getUserProfile = async (req, res) => {
     const currentId = req.params.id;
-    console.log(currentId);
 
     try {
         await connectClient();
@@ -112,9 +107,7 @@ const getUserProfile = async (req, res) => {
 
         const user = await usersCollection.findOne({
             _id: new ObjectId(currentId)
-        })
-
-        console.log("User found:", user);
+        });
 
         if (!user) {
             return res.status(404).send("User not found!");
@@ -131,12 +124,62 @@ const getUserProfile = async (req, res) => {
 }
 
 
-const updateUserProfile = (req, res) => {
+const updateUserProfile = async (req, res) => {
+    const currentId = req.params.id;
+    const {email, password } = req.body;
 
-}
+    try{
+        let updateFields = {email};
+        if(password){
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = bcrypt.hash(password,salt);
+            updateFields.password = hashedPassword;
+        }
+
+        await connectClient();
+        const db = client.db("githubDB");
+        const usersCollection = db.collection("users");
+
+        const result = await usersCollection.findOneAndUpdate(
+            {
+                _id:new ObjectId(currentId),
+            },{$set:updateFields},
+            {returnDocument:"after"}
+        );
+
+        if(!result.value){
+            return res.status(404).send("User not found!");
+        }
+
+        res.json({
+            message:"Profile updated",
+            user:result.value,      
+        });
+
+    }catch(err){
+        console.error("Error during updating: ", err.message);
+        res.status(500).send("Server error!");
+    }
+
+};
 
 const deleteUserProfile = (req, res) => {
-    res.send("User profile deleted!");
+    const userId = req.params.id;
+    try{
+        connectClient();
+        const db = client.db("githubDB");
+        const usersCollection = db.collection("users");
+        const result  = usersCollection.deleteOne({_id:new ObjectId(userId)});
+        if(result.deletedCount === 0){
+            return res.status(404).send("User not found!");
+        };
+
+        res.json({message:"User deleted"});
+    }catch(err){
+        console.error("Error during deleting: ", err.message);
+        res.status(500).send("Server error!");
+    }
+   
 
 }
 
