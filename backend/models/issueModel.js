@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import Schema from "mongoose/Schema.js";
+import mongoose,{Schema} from "mongoose";
 
 const IssueSchema = new Schema({
     title:{
@@ -17,7 +16,7 @@ const IssueSchema = new Schema({
     },
     repository:{
         type:Schema.Types.ObjectId,
-        ref="Repository",
+        ref:"Repository",
         required:true,
     },
 
