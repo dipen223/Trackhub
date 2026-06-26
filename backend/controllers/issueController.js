@@ -1,7 +1,7 @@
-import mongoose from mongoose;
-import Issue from "../models/issueModel";
-import Repository from "../models/repoModel";
-import User from "../models/userModel";
+import mongoose from "mongoose";
+import Issue from "../models/issueModel.js";
+import Repository from "../models/repoModel.js";
+import User from "../models/userModel.js";
 
 
 const createIssue = async (req,res) =>{
@@ -9,7 +9,7 @@ const createIssue = async (req,res) =>{
     const {id} = req.params;
 
     try{
-            const issue = new Issue({
+        const issue = new Issue({
         title:title,
         description:description,
         repository:id
@@ -37,7 +37,7 @@ const updateIssueById = async (req,res) =>{
         const issue = await Issue.findById(id);
 
         if(!issue){
-            res.status(404).send("Issue not found!");
+            return res.status(404).send("Issue not found!");
         
         }
 
@@ -48,7 +48,7 @@ const updateIssueById = async (req,res) =>{
 
         await issue.save();
 
-        res.json({message:"Issue Updated"},issue);
+        res.json({message:"Issue Updated",issue});
         
     } catch(err){
         console.error("Error updating an issue: ",err.message);
@@ -63,7 +63,7 @@ const deleteIssueById = async (req,res) =>{
     try{
         const issue = await Issue.findByIdAndDelete(id);
 
-        if(!isssue){
+        if(!issue){
              res.status(404).send("Issue not found!");
         }
 
@@ -80,7 +80,7 @@ const getAllIssues = async (req,res) =>{
     try{
 
         const issues = await Issue.find({repository:id});
-        if(!issues){
+        if(issues.length ===  0){
             res.status(404).json({error:"Issues not found! "});
         }
         res.status(200).json(issues);
@@ -97,9 +97,9 @@ const getIssueById = async (req,res) =>{
     const {id} = req.params;
 
     try{
-        const issue = Issue.findById(id);
+        const issue = await Issue.findById(id);
         if(!issue){
-            res.status(404).json({error:"Issue not found! "});
+            return res.status(404).json({error:"Issue not found! "});
         }
 
         res.json(issue);

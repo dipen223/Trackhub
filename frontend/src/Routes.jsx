@@ -4,10 +4,11 @@ import {useNavigate,useRoutes} from 'react-router-dom';
 import Dashboard from "./components/dashboard/Dashboard.jsx";
 import Profile from "./components/user/Profile.jsx";
 import Issue from "./components/issue/Issue.jsx";
-import Signup from "./components/auth/Signup.jsx";
-import Login from "./components/auth/Login.jsx";
+
 
 import { useAuth } from "./AuthContext";
+import Signup from "./components/auth/Signup.jsx";
+import Login from "./components/auth/Login.jsx"
 
 
 const Routes = () => {
@@ -20,7 +21,7 @@ const Routes = () => {
             navigate("/auth");
         }
 
-        if (currentUser && window.location.pathname=="/auth") {
+        if (currentUser && ["/auth", "/signup"].includes(window.location.pathname)) {
             navigate("/");
         }
     }, [currentUser, navigate]); 
@@ -34,7 +35,6 @@ const Routes = () => {
             path:"/auth",
             element:<Login/>
         },
-        
         {
             path:"/signup",
             element:<Signup/>
