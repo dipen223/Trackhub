@@ -7,7 +7,7 @@ repoRouter.post("/repo/create",repoController.createRepository);
 repoRouter.get("/repo/all",repoController.getAllRepos);
 repoRouter.get("/repo/:id",repoController.fetchRepoById);
 repoRouter.get("/repo/name/:name",repoController.fetchRepoByName);
-repoRouter.get("/repo/user/:userID",repoController.fetchRepoForCurrentUser);
+repoRouter.get("/repo/user/:userId",repoController.fetchRepoForCurrentUser);
 repoRouter.put("/repo/update/:id",repoController.updateRepoById);
 repoRouter.patch("/repo/toggle/:id",repoController.toggleVisibilityById);
 repoRouter.delete("/repo/delete/:id",repoController.deleteRepoById);
