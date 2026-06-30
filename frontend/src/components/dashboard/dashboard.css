@@ -1,0 +1,23 @@
+*,*::before,*::after{
+    margin:0;
+    padding:0;
+}
+section{
+    margin:20px;
+    display:flex;
+    width:1080px;
+    justify-content: space-between;
+}
+
+.starRepo{
+    display: flex;
+    align-items:center;
+    gap:5px;
+    cursor: pointer;
+}
+.fa-solid{
+ color: gold;
+}
+.fa-regular{
+    color: gray;
+    }
