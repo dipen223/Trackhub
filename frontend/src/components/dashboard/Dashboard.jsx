@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./dashboard.css"
 import axios from "axios";
+import Navbar from "../Navbar";
 const Dashboard = () => {
 
     const [repositories, setRepositories] = useState([]);
@@ -8,9 +9,6 @@ const Dashboard = () => {
     const [suggestedRepositories, setSuggestedRepositories] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const [starredRepositories, setStarredRepositories] = useState([]);
-
-
-
 
     useEffect(() => {
 
@@ -88,7 +86,9 @@ const handleStar = async (repoId) => {
 
    
 
-    return <section>
+    return<> 
+    <Navbar/>
+    <section>
         <aside>
             <h2>Suggested Repositories</h2>
             {suggestedRepositories.map((repo) => {
@@ -135,6 +135,7 @@ const handleStar = async (repoId) => {
         </aside>
     </section>
 
+    </>
 
 }
 
